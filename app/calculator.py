@@ -198,7 +198,8 @@ class Calculator:
             calculation = Calculation(
                 operation=str(self.operation_strategy),
                 operand1=validated_a,
-                operand2=validated_b
+                operand2=validated_b,
+                result=result
             )
 
             # Save the current state to the undo stack before making changes

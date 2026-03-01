@@ -2,8 +2,7 @@ from dataclasses import dataclass, field
 import datetime
 from decimal import Decimal, InvalidOperation
 import logging
-import math
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from app.exceptions import OperationError
 
@@ -25,17 +24,17 @@ class Calculation:
     operand2: Decimal       # The second operand in the calculation
 
     # Fields with default values
-    result: Decimal = field(init=False)  # The result of the calculation, computed post-initialization
+    result: Optional[Decimal] = None  # Optional precomputed result to avoid duplicate execution paths
     timestamp: datetime.datetime = field(default_factory=datetime.datetime.now)  # Time when the calculation was performed
 
     def __post_init__(self):
         """
         Post-initialization processing.
 
-        Automatically calculates the result of the operation after the Calculation
-        instance is created.
+        Calculates the result only when it is not already provided.
         """
-        self.result = self.calculate()
+        if self.result is None:
+            self.result = self.calculate()
 
     def calculate(self) -> Decimal:
         """
@@ -56,7 +55,13 @@ class Calculation:
             "Addition": lambda x, y: x + y,
             "Subtraction": lambda x, y: x - y,
             "Multiplication": lambda x, y: x * y,
-            "Division": lambda x, y: x / y if y != 0 else self._raise_div_zero()
+            "Division": lambda x, y: x / y if y != 0 else self._raise_div_zero(),
+            "Power": lambda x, y: Decimal(pow(float(x), float(y))),
+            "Root": lambda x, y: Decimal(pow(float(x), 1 / float(y))),
+            "Modulus": lambda x, y: x % y if y != 0 else self._raise_div_zero(),
+            "IntegerDivision": lambda x, y: x // y if y != 0 else self._raise_div_zero(),
+            "Percentage": lambda x, y: (x / y) * 100 if y != 0 else self._raise_div_zero(),
+            "AbsoluteDifference": lambda x, y: abs(x - y)
         }
 
         # Retrieve the operation function based on the operation name
