@@ -56,8 +56,8 @@ class Calculation:
             "Subtraction": lambda x, y: x - y,
             "Multiplication": lambda x, y: x * y,
             "Division": lambda x, y: x / y if y != 0 else self._raise_div_zero(),
-            "Power": lambda x, y: Decimal(pow(float(x), float(y))),
-            "Root": lambda x, y: Decimal(pow(float(x), 1 / float(y))),
+            "Power": self._power,
+            "Root": self._root,
             "Modulus": lambda x, y: x % y if y != 0 else self._raise_div_zero(),
             "IntegerDivision": lambda x, y: x // y if y != 0 else self._raise_div_zero(),
             "Percentage": lambda x, y: (x / y) * 100 if y != 0 else self._raise_div_zero(),
@@ -72,9 +72,25 @@ class Calculation:
         try:
             # Execute the operation with the provided operands
             return op(self.operand1, self.operand2)
-        except (InvalidOperation, ValueError, ArithmeticError) as e:
+        except (InvalidOperation, ValueError, ArithmeticError, TypeError) as e:
             # Handle any errors that occur during calculation
             raise OperationError(f"Calculation failed: {str(e)}")
+
+    @staticmethod
+    def _power(x: Decimal, y: Decimal) -> Decimal:
+        """Power helper with explicit validation."""
+        if y < 0:
+            raise OperationError("Negative exponents are not supported")
+        return Decimal(pow(float(x), float(y)))
+
+    @staticmethod
+    def _root(x: Decimal, y: Decimal) -> Decimal:
+        """Root helper with explicit validation."""
+        if x < 0:
+            raise OperationError("Cannot calculate root of negative number")
+        if y == 0:
+            raise OperationError("Zero root is undefined")
+        return Decimal(pow(float(x), 1 / float(y)))
 
     @staticmethod
     def _raise_div_zero():  # pragma: no cover
