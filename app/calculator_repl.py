@@ -3,6 +3,11 @@ import logging
 
 from app.calculator import Calculator
 from app.exceptions import OperationError, ValidationError
+from app.help_menu import (
+    BaseHelpMenu,
+    OperationsHelpDecorator,
+    SystemCommandsHelpDecorator,
+)
 from app.history import AutoSaveObserver, LoggingObserver
 from app.operations import OperationFactory
 
@@ -28,18 +33,17 @@ def calculator_repl():
             try:
                 # Prompt the user for a command
                 command = input("\nEnter command: ").lower().strip()
+                operation_commands = OperationFactory.available_operations()
+                operation_command_set = set(operation_commands)
 
                 if command == 'help':
-                    # Display available commands
+                    # Build help dynamically from currently registered operations.
+                    help_menu = SystemCommandsHelpDecorator(
+                        OperationsHelpDecorator(BaseHelpMenu(), operation_commands)
+                    )
                     print("\nAvailable commands:")
-                    print("  add, subtract, multiply, divide, power, root, modulus, int_divide, percent, abs_diff - Perform calculations")
-                    print("  history - Show calculation history")
-                    print("  clear - Clear calculation history")
-                    print("  undo - Undo the last calculation")
-                    print("  redo - Redo the last undone calculation")
-                    print("  save - Save calculation history to file")
-                    print("  load - Load calculation history from file")
-                    print("  exit - Exit the calculator")
+                    for line in help_menu.render():
+                        print(line)
                     continue
 
                 if command == 'exit':
@@ -103,7 +107,7 @@ def calculator_repl():
                         print(f"Error loading history: {e}")
                     continue
 
-                if command in ['add', 'subtract', 'multiply', 'divide', 'power', 'root', 'modulus', 'int_divide', 'percentage', 'abs_diff']:
+                if command in operation_command_set:
                     # Perform the specified arithmetic operation
                     try:
                         print("\nEnter numbers (or 'cancel' to abort):")

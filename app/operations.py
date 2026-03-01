@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
+import math
 from typing import Dict
 from app.exceptions import ValidationError
 
@@ -375,6 +376,36 @@ class AbsoluteDifference(Operation):
         difference = a - b
         return difference if difference >= 0 else -difference
 
+class Logarithm(Operation):
+    """
+    Logarithm operation implementation.
+
+    Calculates the logarithm of a number with a specified base.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands for logarithm operation.
+
+        Args:
+            a (Decimal): Number to evaluate logarithm for.
+            b (Decimal): Logarithm base.
+
+        Raises:
+            ValidationError: If number/base are invalid for logarithm.
+        """
+        super().validate_operands(a, b)
+        if a <= 0:
+            raise ValidationError("Logarithm undefined for non-positive numbers")
+        if b <= 0 or b == 1:
+            raise ValidationError("Logarithm base must be positive and not equal to 1")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate logarithm of a with base b.
+        """
+        self.validate_operands(a, b)
+        return Decimal(math.log(float(a), float(b)))
 
 class OperationFactory:
     """
@@ -396,7 +427,8 @@ class OperationFactory:
         'modulus': Modulus,
         'int_divide': IntegerDivision,
         'percentage': Percentage,
-        'abs_diff': AbsoluteDifference
+        'abs_diff': AbsoluteDifference,
+        'log': Logarithm,
     }
 
     @classmethod
@@ -416,6 +448,16 @@ class OperationFactory:
         if not issubclass(operation_class, Operation):
             raise TypeError("Operation class must inherit from Operation")
         cls._operations[name.lower()] = operation_class
+
+    @classmethod
+    def available_operations(cls) -> list[str]:
+        """
+        Return sorted operation command names available in the factory.
+
+        Returns:
+            list[str]: Operation command keys.
+        """
+        return sorted(cls._operations.keys())
 
     @classmethod
     def create_operation(cls, operation_type: str) -> Operation:

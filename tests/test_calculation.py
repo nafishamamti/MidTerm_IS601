@@ -70,6 +70,21 @@ def test_abs_diff():
     assert calc.result == Decimal("7")
 
 
+def test_logarithm():
+    calc = Calculation(operation="Logarithm", operand1=Decimal("100"), operand2=Decimal("10"))
+    assert calc.result == Decimal("2")
+
+
+def test_invalid_logarithm_value():
+    with pytest.raises(OperationError, match="Logarithm undefined for non-positive numbers"):
+        Calculation(operation="Logarithm", operand1=Decimal("0"), operand2=Decimal("10"))
+
+
+def test_invalid_logarithm_base():
+    with pytest.raises(OperationError, match="Logarithm base must be positive and not equal to 1"):
+        Calculation(operation="Logarithm", operand1=Decimal("10"), operand2=Decimal("1"))
+
+
 def test_invalid_root():
     with pytest.raises(OperationError, match="Cannot calculate root of negative number"):
         Calculation(operation="Root", operand1=Decimal("-16"), operand2=Decimal("2"))

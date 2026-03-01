@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 import datetime
 from decimal import Decimal, InvalidOperation
 import logging
+import math
 from typing import Any, Dict, Optional
 
 from app.exceptions import OperationError
@@ -58,6 +59,7 @@ class Calculation:
             "Division": lambda x, y: x / y if y != 0 else self._raise_div_zero(),
             "Power": self._power,
             "Root": self._root,
+            "Logarithm": self._logarithm,
             "Modulus": lambda x, y: x % y if y != 0 else self._raise_div_zero(),
             "IntegerDivision": lambda x, y: x // y if y != 0 else self._raise_div_zero(),
             "Percentage": lambda x, y: (x / y) * 100 if y != 0 else self._raise_div_zero(),
@@ -91,6 +93,15 @@ class Calculation:
         if y == 0:
             raise OperationError("Zero root is undefined")
         return Decimal(pow(float(x), 1 / float(y)))
+
+    @staticmethod
+    def _logarithm(x: Decimal, y: Decimal) -> Decimal:
+        """Logarithm helper with explicit validation."""
+        if x <= 0:
+            raise OperationError("Logarithm undefined for non-positive numbers")
+        if y <= 0 or y == 1:
+            raise OperationError("Logarithm base must be positive and not equal to 1")
+        return Decimal(math.log(float(x), float(y)))
 
     @staticmethod
     def _raise_div_zero():  # pragma: no cover

@@ -11,6 +11,7 @@ from app.operations import (
     Division,
     Power,
     Root,
+    Logarithm,
     Modulus,
     IntegerDivision,
     Percentage,
@@ -215,6 +216,37 @@ class TestModulus(BaseOperationTest):
     }
 
 
+class TestLogarithm(BaseOperationTest):
+    """Test Logarithm operation."""
+
+    operation_class = Logarithm
+    valid_test_cases = {
+        "base_10": {"a": "100", "b": "10", "expected": "2"},
+        "base_2": {"a": "8", "b": "2", "expected": "3"},
+        "fractional_result": {"a": "9", "b": "3", "expected": "2"},
+    }
+    invalid_test_cases = {
+        "non_positive_number": {
+            "a": "0",
+            "b": "10",
+            "error": ValidationError,
+            "message": "Logarithm undefined for non-positive numbers"
+        },
+        "invalid_base_one": {
+            "a": "10",
+            "b": "1",
+            "error": ValidationError,
+            "message": "Logarithm base must be positive and not equal to 1"
+        },
+        "invalid_base_non_positive": {
+            "a": "10",
+            "b": "0",
+            "error": ValidationError,
+            "message": "Logarithm base must be positive and not equal to 1"
+        },
+    }
+
+
 class TestIntegerDivision(BaseOperationTest):
     """Test IntegerDivision operation."""
 
@@ -283,6 +315,7 @@ class TestOperationFactory:
             'divide': Division,
             'power': Power,
             'root': Root,
+            'log': Logarithm,
             'modulus': Modulus,
             'int_divide': IntegerDivision,
             'percentage': Percentage,
@@ -318,3 +351,10 @@ class TestOperationFactory:
 
         with pytest.raises(TypeError, match="Operation class must inherit"):
             OperationFactory.register_operation("invalid", InvalidOperation)
+
+    def test_available_operations_returns_sorted_keys(self):
+        """Test available_operations exposes sorted command keys."""
+        operations = OperationFactory.available_operations()
+        assert operations == sorted(operations)
+        assert "add" in operations
+        assert "abs_diff" in operations
