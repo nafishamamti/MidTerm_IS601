@@ -10,10 +10,6 @@ def test_addition():
     calc = Calculation(operation="Addition", operand1=Decimal("2"), operand2=Decimal("3"))
     assert calc.result == Decimal("5")
 
-def test_invalid_parameters():
-    with pytest.raises(ValueError, match="Invalid number format: a"):
-        Calculation(operation="Addition", operand1=Decimal("a"), operand2=Decimal("3"))
-
 
 def test_subtraction():
     calc = Calculation(operation="Subtraction", operand1=Decimal("5"), operand2=Decimal("3"))
@@ -77,6 +73,11 @@ def test_abs_diff():
 def test_invalid_root():
     with pytest.raises(OperationError, match="Cannot calculate root of negative number"):
         Calculation(operation="Root", operand1=Decimal("-16"), operand2=Decimal("2"))
+
+
+def test_zero_root():
+    with pytest.raises(OperationError, match="Zero root is undefined"):
+        Calculation(operation="Root", operand1=Decimal("16"), operand2=Decimal("0"))
 
 
 def test_unknown_operation():

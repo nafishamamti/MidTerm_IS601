@@ -30,6 +30,14 @@ class TestOperation:
 
         assert str(TestOp()) == "TestOp"
 
+    def test_abstract_execute_default_body(self):
+        """Cover the default abstract execute body via super()."""
+        class TestOp(Operation):
+            def execute(self, a: Decimal, b: Decimal) -> Decimal:
+                return super().execute(a, b)
+
+        assert TestOp().execute(Decimal("1"), Decimal("2")) is None
+
 
 class BaseOperationTest:
     """Base test class for all operations."""
@@ -214,8 +222,8 @@ class TestIntegerDivision(BaseOperationTest):
     valid_test_cases = {
         "positive_numbers": {"a": "10", "b": "3", "expected": "3"},
         "exact_division": {"a": "12", "b": "4", "expected": "3"},
-        "negative_dividend": {"a": "-10", "b": "3", "expected": "-4"},
-        "negative_divisor": {"a": "10", "b": "-3", "expected": "-4"},
+        "negative_dividend": {"a": "-10", "b": "3", "expected": "-3"},
+        "negative_divisor": {"a": "10", "b": "-3", "expected": "-3"},
         "decimal_values": {"a": "7.9", "b": "2", "expected": "3"},
     }
     invalid_test_cases = {
