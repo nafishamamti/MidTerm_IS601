@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
-import math
 from typing import Dict
 from app.exceptions import ValidationError
 
@@ -165,6 +164,218 @@ class Division(Operation):
         return a / b
 
 
+class Power(Operation):
+    """
+    Power (exponentiation) operation implementation.
+
+    Raises one number to the power of another.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands for power operation.
+
+        Overrides the base class method to ensure that the exponent is not negative.
+
+        Args:
+            a (Decimal): Base number.
+            b (Decimal): Exponent.
+
+        Raises:
+            ValidationError: If the exponent is negative.
+        """
+        super().validate_operands(a, b)
+        if b < 0:
+            raise ValidationError("Negative exponents not supported")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate one number raised to the power of another.
+
+        Args:
+            a (Decimal): Base number.
+            b (Decimal): Exponent.
+
+        Returns:
+            Decimal: Result of the exponentiation.
+        """
+        self.validate_operands(a, b)
+        return Decimal(pow(float(a), float(b)))
+
+
+class Root(Operation):
+    """
+    Root operation implementation.
+
+    Calculates the nth root of a number.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands for root operation.
+
+        Overrides the base class method to ensure that the number is non-negative
+        and the root degree is not zero.
+
+        Args:
+            a (Decimal): Number from which the root is taken.
+            b (Decimal): Degree of the root.
+
+        Raises:
+            ValidationError: If the number is negative or the root degree is zero.
+        """
+        super().validate_operands(a, b)
+        if a < 0:
+            raise ValidationError("Cannot calculate root of negative number")
+        if b == 0:
+            raise ValidationError("Zero root is undefined")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the nth root of a number.
+
+        Args:
+            a (Decimal): Number from which the root is taken.
+            b (Decimal): Degree of the root.
+
+        Returns:
+            Decimal: Result of the root calculation.
+        """
+        self.validate_operands(a, b)
+        return Decimal(pow(float(a), 1 / float(b)))
+
+
+class Modulus(Operation):
+    """
+    Modulus operation implementation.
+
+    Calculates the remainder of the division of one number by another.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands for modulus operation.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Raises:
+            ValidationError: If the divisor is zero.
+        """
+        super().validate_operands(a, b)
+        if b == 0:
+            raise ValidationError("Division by zero is not allowed")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the remainder of the division of one number by another.
+        """
+        self.validate_operands(a, b)
+        return a % b
+
+
+class IntegerDivision(Operation):
+    """
+    Integer division operation implementation.
+
+    Performs the integer division of one number by another.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands, checking for division by zero.
+
+        Overrides the base class method to ensure that the divisor is not zero.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Raises:
+            ValidationError: If the divisor is zero.
+        """
+        super().validate_operands(a, b)
+        if b == 0:
+            raise ValidationError("Division by zero is not allowed")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Perform integer division of one number by another.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Returns:
+            Decimal: Quotient of the integer division.
+        """
+        self.validate_operands(a, b)
+        return a // b
+
+
+class Percentage(Operation):
+    """
+    Percentage operation implementation.
+
+    Calculates the percentage of one number relative to another.
+    """
+
+    def validate_operands(self, a: Decimal, b: Decimal) -> None:
+        """
+        Validate operands, checking for division by zero.
+
+        Overrides the base class method to ensure that the divisor is not zero.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Raises:
+            ValidationError: If the divisor is zero.
+        """
+        super().validate_operands(a, b)
+        if b == 0:
+            raise ValidationError("Division by zero is not allowed")
+
+    def execute(self, a: Decimal, b: Decimal) -> Decimal:
+        """
+        Calculate the percentage of one number relative to another.
+
+        Args:
+            a (Decimal): Dividend.
+            b (Decimal): Divisor.
+
+        Returns:
+            Decimal: Percentage of the first number relative to the second.
+        """
+        self.validate_operands(a, b)
+        return (a / b) * 100
+
+
+class AbsoluteDifference(Operation):
+    """
+    Absolute difference operation implementation.
+
+    Calculates the absolute difference between two numbers.
+    """
+
+    def execute(self, a: Decimal, b: Decimal = Decimal(0)) -> Decimal:
+        """
+        Calculate the absolute difference between two numbers.
+
+        Args:
+            a (Decimal): The first number.
+            b (Decimal): The second number.
+
+        Returns:
+            Decimal: Absolute difference between the two numbers.
+        """
+        self.validate_operands(a, b)
+        difference = a - b
+        return difference if difference >= 0 else -difference
+
+
 class OperationFactory:
     """
     Factory class for creating operation instances.
@@ -180,6 +391,12 @@ class OperationFactory:
         'subtract': Subtraction,
         'multiply': Multiplication,
         'divide': Division,
+        'power': Power,
+        'root': Root,
+        'modulus': Modulus,
+        'integer_division': IntegerDivision,
+        'percentage': Percentage,
+        'absolute_difference': AbsoluteDifference
     }
 
     @classmethod
