@@ -10,6 +10,7 @@ from app.help_menu import (
 )
 from app.history import AutoSaveObserver, LoggingObserver
 from app.operations import OperationFactory
+from app.output_style import OutputFormatter
 
 
 def calculator_repl():
@@ -22,12 +23,13 @@ def calculator_repl():
     try:
         # Initialize the Calculator instance
         calc = Calculator()
+        formatter = OutputFormatter()
 
         # Register observers for logging and auto-saving history
         calc.add_observer(LoggingObserver())
         calc.add_observer(AutoSaveObserver(calc))
 
-        print("Calculator started. Type 'help' for commands.")
+        print(formatter.format("Calculator started. Type 'help' for commands.", "info"))
 
         while True:
             try:
@@ -43,81 +45,81 @@ def calculator_repl():
                     )
                     print("\nAvailable commands:")
                     for line in help_menu.render():
-                        print(line)
+                        print(formatter.format(line, "info"))
                     continue
 
                 if command == 'exit':
                     # Attempt to save history before exiting
                     try:
                         calc.save_history()
-                        print("History saved successfully.")
+                        print(formatter.format("History saved successfully.", "success"))
                     except Exception as e:
-                        print(f"Warning: Could not save history: {e}")
-                    print("Goodbye!")
+                        print(formatter.format(f"Warning: Could not save history: {e}", "warning"))
+                    print(formatter.format("Goodbye!", "info"))
                     break
 
                 if command == 'history':
                     # Display calculation history
                     history = calc.show_history()
                     if not history:
-                        print("No calculations in history")
+                        print(formatter.format("No calculations in history", "warning"))
                     else:
-                        print("\nCalculation History:")
+                        print(formatter.format("\nCalculation History:", "info"))
                         for i, entry in enumerate(history, 1):
-                            print(f"{i}. {entry}")
+                            print(formatter.format(f"{i}. {entry}", "info"))
                     continue
 
                 if command == 'clear':
                     # Clear calculation history
                     calc.clear_history()
-                    print("History cleared")
+                    print(formatter.format("History cleared", "success"))
                     continue
 
                 if command == 'undo':
                     # Undo the last calculation
                     if calc.undo():
-                        print("Operation undone")
+                        print(formatter.format("Operation undone", "success"))
                     else:
-                        print("Nothing to undo")
+                        print(formatter.format("Nothing to undo", "warning"))
                     continue
 
                 if command == 'redo':
                     # Redo the last undone calculation
                     if calc.redo():
-                        print("Operation redone")
+                        print(formatter.format("Operation redone", "success"))
                     else:
-                        print("Nothing to redo")
+                        print(formatter.format("Nothing to redo", "warning"))
                     continue
 
                 if command == 'save':
                     # Save calculation history to file
                     try:
                         calc.save_history()
-                        print("History saved successfully")
+                        print(formatter.format("History saved successfully", "success"))
                     except Exception as e:
-                        print(f"Error saving history: {e}")
+                        print(formatter.format(f"Error saving history: {e}", "error"))
                     continue
 
                 if command == 'load':
                     # Load calculation history from file
                     try:
                         calc.load_history()
-                        print("History loaded successfully")
+                        print(formatter.format("History loaded successfully", "success"))
                     except Exception as e:
-                        print(f"Error loading history: {e}")
+                        print(formatter.format(f"Error loading history: {e}", "error"))
                     continue
 
                 if command in operation_command_set:
                     # Perform the specified arithmetic operation
                     try:
-                        print("\nEnter numbers (or 'cancel' to abort):")
+                        print(formatter.format("\nEnter numbers (or 'cancel' to abort):", "prompt"))
                         a = input("First number: ")
                         if a.lower() == 'cancel':
-                            print("Operation cancelled")
+                            print(formatter.format("Operation cancelled", "warning"))
                             continue
                         b = input("Second number: ")
                         if b.lower() == 'cancel':
-                            print("Operation cancelled")
+                            print(formatter.format("Operation cancelled", "warning"))
                             continue
 
                         # Create the appropriate operation instance using the Factory pattern
@@ -131,29 +133,32 @@ def calculator_repl():
                         if isinstance(result, Decimal):
                             result = result.normalize()
 
-                        print(f"\nResult: {result}")
+                        print(formatter.format(f"\nResult: {result}", "success"))
                     except (ValidationError, OperationError) as e:
                         # Handle known exceptions related to validation or operation errors
-                        print(f"Error: {e}")
+                        print(formatter.format(f"Error: {e}", "error"))
                     except Exception as e:
                         # Handle any unexpected exceptions
-                        print(f"Unexpected error: {e}")
+                        print(formatter.format(f"Unexpected error: {e}", "error"))
                     continue
 
                 # Handle unknown commands
-                print(f"Unknown command: '{command}'. Type 'help' for available commands.")
+                print(formatter.format(
+                    f"Unknown command: '{command}'. Type 'help' for available commands.",
+                    "warning"
+                ))
 
             except KeyboardInterrupt:
                 # Handle Ctrl+C interruption gracefully
-                print("\nOperation cancelled")
+                print(formatter.format("\nOperation cancelled", "warning"))
                 continue
             except EOFError:
                 # Handle end-of-file (e.g., Ctrl+D) gracefully
-                print("\nInput terminated. Exiting...")
+                print(formatter.format("\nInput terminated. Exiting...", "info"))
                 break
             except Exception as e:
                 # Handle any other unexpected exceptions
-                print(f"Error: {e}")
+                print(formatter.format(f"Error: {e}", "error"))
                 continue
 
     except Exception as e:
