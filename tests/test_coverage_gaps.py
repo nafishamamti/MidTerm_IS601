@@ -220,3 +220,55 @@ def test_repl_fatal_initialization_error():
             calculator_repl()
     print_mock.assert_any_call("Fatal error: init failed")
     log_error_mock.assert_called_once()
+
+
+def test_repl_queue_and_run_queue_success_and_empty_branches():
+    mock_calc = Mock()
+    mock_calc.perform_operation.return_value = Decimal("5")
+    with patch("app.calculator_repl.Calculator", return_value=mock_calc), \
+         patch(
+             "builtins.input",
+             side_effect=[
+                 "queue", "cancel",
+                 "queue", "badop",
+                 "queue", "add", "cancel",
+                 "queue", "add", "2", "cancel",
+                 "queue", "add", "2", "3",
+                 "run_queue",
+                 "run_queue",
+                 "exit",
+             ],
+         ), \
+         patch("builtins.print") as print_mock:
+        calculator_repl()
+
+    print_mock.assert_any_call("Operation cancelled")
+    print_mock.assert_any_call("Unknown operation: 'badop'. Use 'help' to view available operations.")
+    print_mock.assert_any_call("Operation queued. Queue size: 1")
+    print_mock.assert_any_call("Queued Result 1: 5")
+    print_mock.assert_any_call("No queued operations to run")
+
+
+def test_repl_queue_error_branch():
+    mock_calc = Mock()
+    with patch("app.calculator_repl.Calculator", return_value=mock_calc), \
+         patch("app.calculator_repl.CommandQueue.enqueue", side_effect=Exception("queue-fail")), \
+         patch("builtins.input", side_effect=["queue", "add", "2", "3", "exit"]), \
+         patch("builtins.print") as print_mock:
+        calculator_repl()
+    print_mock.assert_any_call("Error queueing operation: queue-fail")
+
+
+def test_repl_run_queue_error_branches():
+    mock_calc = Mock()
+    with patch("app.calculator_repl.Calculator", return_value=mock_calc), \
+         patch("app.calculator_repl.CommandQueue.size", return_value=1), \
+         patch(
+             "app.calculator_repl.CommandQueue.execute_all",
+             side_effect=[ValidationError("bad queue"), Exception("boom")],
+         ), \
+         patch("builtins.input", side_effect=["run_queue", "run_queue", "exit"]), \
+         patch("builtins.print") as print_mock:
+        calculator_repl()
+    print_mock.assert_any_call("Error: bad queue")
+    print_mock.assert_any_call("Unexpected error: boom")

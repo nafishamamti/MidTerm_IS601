@@ -54,6 +54,8 @@ class SystemCommandsHelpDecorator(HelpMenuDecorator):
             "  redo - Redo the last undone calculation",
             "  save - Save calculation history to file",
             "  load - Load calculation history from file",
+            "  queue - Add an operation to the execution queue",
+            "  run_queue - Execute all queued operations",
             "  exit - Exit the calculator",
         ])
         return lines

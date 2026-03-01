@@ -2,6 +2,7 @@ from decimal import Decimal
 import logging
 
 from app.calculator import Calculator
+from app.commands import CalculateCommand, CommandQueue
 from app.exceptions import OperationError, ValidationError
 from app.help_menu import (
     BaseHelpMenu,
@@ -28,6 +29,7 @@ def calculator_repl():
         # Register observers for logging and auto-saving history
         calc.add_observer(LoggingObserver())
         calc.add_observer(AutoSaveObserver(calc))
+        command_queue = CommandQueue()
 
         print(formatter.format("Calculator started. Type 'help' for commands.", "info"))
 
@@ -109,6 +111,59 @@ def calculator_repl():
                         print(formatter.format(f"Error loading history: {e}", "error"))
                     continue
 
+                if command == 'queue':
+                    try:
+                        print(formatter.format("\nQueue an operation (or 'cancel' to abort):", "prompt"))
+                        queued_operation_name = input("Operation: ").lower().strip()
+                        if queued_operation_name == 'cancel':
+                            print(formatter.format("Operation cancelled", "warning"))
+                            continue
+                        if queued_operation_name not in operation_command_set:
+                            print(formatter.format(
+                                f"Unknown operation: '{queued_operation_name}'. Use 'help' to view available operations.",
+                                "warning"
+                            ))
+                            continue
+
+                        a = input("First number: ")
+                        if a.lower() == 'cancel':
+                            print(formatter.format("Operation cancelled", "warning"))
+                            continue
+                        b = input("Second number: ")
+                        if b.lower() == 'cancel':
+                            print(formatter.format("Operation cancelled", "warning"))
+                            continue
+
+                        command_queue.enqueue(
+                            CalculateCommand(
+                                calculator=calc,
+                                operation_name=queued_operation_name,
+                                operand1=a,
+                                operand2=b,
+                                operation_factory=OperationFactory,
+                            )
+                        )
+                        print(formatter.format(f"Operation queued. Queue size: {command_queue.size()}", "success"))
+                    except Exception as e:
+                        print(formatter.format(f"Error queueing operation: {e}", "error"))
+                    continue
+
+                if command == 'run_queue':
+                    try:
+                        if command_queue.size() == 0:
+                            print(formatter.format("No queued operations to run", "warning"))
+                            continue
+                        results = command_queue.execute_all()
+                        for i, result in enumerate(results, 1):
+                            if isinstance(result, Decimal):
+                                result = result.normalize()
+                            print(formatter.format(f"Queued Result {i}: {result}", "success"))
+                    except (ValidationError, OperationError) as e:
+                        print(formatter.format(f"Error: {e}", "error"))
+                    except Exception as e:
+                        print(formatter.format(f"Unexpected error: {e}", "error"))
+                    continue
+
                 if command in operation_command_set:
                     # Perform the specified arithmetic operation
                     try:
@@ -122,12 +177,14 @@ def calculator_repl():
                             print(formatter.format("Operation cancelled", "warning"))
                             continue
 
-                        # Create the appropriate operation instance using the Factory pattern
-                        operation = OperationFactory.create_operation(command)
-                        calc.set_operation(operation)
-
-                        # Perform the calculation
-                        result = calc.perform_operation(a, b)
+                        # Execute calculation via Command pattern.
+                        result = CalculateCommand(
+                            calculator=calc,
+                            operation_name=command,
+                            operand1=a,
+                            operand2=b,
+                            operation_factory=OperationFactory,
+                        ).execute()
 
                         # Normalize the result if it's a Decimal
                         if isinstance(result, Decimal):

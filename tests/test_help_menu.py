@@ -23,4 +23,6 @@ def test_help_menu_decorator_composition():
 
     assert lines[0] == "  add, multiply, root - Perform calculations"
     assert "  history - Show calculation history" in lines
+    assert "  queue - Add an operation to the execution queue" in lines
+    assert "  run_queue - Execute all queued operations" in lines
     assert "  exit - Exit the calculator" in lines
