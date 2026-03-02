@@ -56,10 +56,10 @@ CALCULATOR_AUTO_SAVE=true
 CALCULATOR_PRECISION=10
 CALCULATOR_MAX_INPUT_VALUE=1e999
 CALCULATOR_DEFAULT_ENCODING=utf-8
-CALCULATOR_LOG_DIR=/Users/radhika/Documents/IS601/midterm/logs
-CALCULATOR_LOG_FILE=/Users/radhika/Documents/IS601/midterm/logs/calculator.log
-CALCULATOR_HISTORY_DIR=/Users/radhika/Documents/IS601/midterm/history
-CALCULATOR_HISTORY_FILE=/Users/radhika/Documents/IS601/midterm/history/calculator_history.csv
+CALCULATOR_LOG_DIR=/Users/nafisha/Documents/IS601/midterm/logs
+CALCULATOR_LOG_FILE=/Users/nafisha/Documents/IS601/midterm/logs/calculator.log
+CALCULATOR_HISTORY_DIR=/Users/nafisha/Documents/IS601/midterm/history
+CALCULATOR_HISTORY_FILE=/Users/nafisha/Documents/IS601/midterm/history/calculator_history.csv
 ```
 
 3. Logging setup notes:
