@@ -19,7 +19,7 @@ Use Python 3.12+ (project also runs in the provided local `venv`).
 
 1. Clone and enter the project:
 ```bash
-cd /Users/radhika/Documents/IS601/midterm
+cd /Users/nafisha/Documents/IS601/midterm
 ```
 
 2. Create a virtual environment:
@@ -50,7 +50,7 @@ If `.env.example` does not exist, create `.env` manually.
 
 2. Add environment variables (example):
 ```env
-CALCULATOR_BASE_DIR=/Users/radhika/Documents/IS601/midterm
+CALCULATOR_BASE_DIR=/Users/nafisha/Documents/IS601/midterm
 CALCULATOR_MAX_HISTORY_SIZE=1000
 CALCULATOR_AUTO_SAVE=true
 CALCULATOR_PRECISION=10
