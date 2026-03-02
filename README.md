@@ -5,7 +5,7 @@ This project is a command-line calculator built with object-oriented design and 
 It supports arithmetic operations, history persistence, undo/redo, observer-based autosave/logging, and robust input validation.
 
 ### Core Features
-- Arithmetic operations: `add`, `subtract`, `multiply`, `divide`, `power`, `root`, `modulus`, `int_divide`, `percentage`, `abs_diff`
+- Arithmetic operations: `add`, `subtract`, `multiply`, `divide`, `power`, `root`, `modulus`, `int_divide`, `percentage`, `abs_diff`, `log`
 - Calculation history: view, save, load, clear
 - Undo/redo support via memento pattern
 - Input validation and custom exception handling
